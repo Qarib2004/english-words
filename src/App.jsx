@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { RotateCcw, ChevronRight, ChevronLeft } from 'lucide-react';
 
 const App = () => {
+  const shuffleArray = (array) => {
+    const shuffled = [...array]; 
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
   const topicsData = {
     'A1-Fruits': [
       { en: 'fruit', phonetic: 'fruːt', az: 'meyvə' },
@@ -221,11 +229,15 @@ const App = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
 
-  const vocabulary = selectedTopic ? topicsData[selectedTopic] : [];
+  const [shuffledVocabulary, setShuffledVocabulary] = useState([]);
+
+  const vocabulary = shuffledVocabulary;
+
+  const fullVocabulary = selectedTopic ? topicsData[selectedTopic] : [];
 
   const getRandomOptions = () => {
     const current = vocabulary[currentIndex];
-    const allAnswers = vocabulary.map((v) => mode === 'en-az' ? v.az : v.en);
+    const allAnswers = fullVocabulary.map((v) => mode === 'en-az' ? v.az : v.en);
     const correctAnswer = mode === 'en-az' ? current.az : current.en;
     
     let options = [correctAnswer];
@@ -238,13 +250,16 @@ const App = () => {
     
     return options.sort(() => Math.random() - 0.5);
   };
-
   const handleSelectTopic = (topic) => {
     setSelectedTopic(topic);
     setCurrentView('modes');
   };
 
   const handleStartQuiz = (selectedMode) => {
+     const topicVocab = topicsData[selectedTopic];
+     const newShuffledVocab = shuffleArray(topicVocab);
+     
+     setShuffledVocabulary(newShuffledVocab);
     setMode(selectedMode);
     setCurrentView('quiz');
     setCurrentIndex(0);
@@ -293,6 +308,7 @@ const App = () => {
     setAnswered(false);
     setSelectedAnswer(null);
     setIsCorrect(null);
+    setShuffledVocabulary([]); 
   };
 
   const handleBackToModes = () => {
@@ -303,6 +319,7 @@ const App = () => {
     setAnswered(false);
     setSelectedAnswer(null);
     setIsCorrect(null);
+    setShuffledVocabulary([]); 
   };
 
   const handleBackToTopics = () => {
@@ -311,11 +328,11 @@ const App = () => {
     setMode(null);
     setCurrentIndex(0);
     setScore(0);
+    setShuffledVocabulary([]); 
   };
 
   const current = vocabulary[currentIndex];
   const options = current ? getRandomOptions() : [];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {currentView === 'topics' && (
